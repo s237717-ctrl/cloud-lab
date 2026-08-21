@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Chuỗi kết nối chuẩn với user 'admin' và pass 'KimCuong2026Db'
+// Chuỗi kết nối MongoDB Atlas
 const mongoURI = "mongodb+srv://admin:KimCuong2026Db@cluster0.gsryspa.mongodb.net/mern-demo?retryWrites=true&w=majority";
 
 mongoose.connect(mongoURI)
@@ -16,7 +16,7 @@ mongoose.connect(mongoURI)
 
 const Student = require('./models/Student');
 
-// API Lấy danh sách sinh viên
+// 1. API Lấy danh sách sinh viên (GET)
 app.get('/api/students', async (req, res) => {
   try {
     const students = await Student.find();
@@ -26,7 +26,7 @@ app.get('/api/students', async (req, res) => {
   }
 });
 
-// API Thêm sinh viên mới
+// 2. API Thêm sinh viên mới (POST - Câu 49)
 app.post('/api/students', async (req, res) => {
   try {
     const { studentId, name, email } = req.body;
@@ -35,6 +35,44 @@ app.post('/api/students', async (req, res) => {
     res.status(201).json(newStudent);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// 3. API Cập nhật sinh viên (PUT - Câu 61)
+app.put('/api/students/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { studentId, name, email } = req.body;
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      id,
+      { studentId, name, email },
+      { new: true } // Trả về dữ liệu đã cập nhật
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+    }
+
+    res.json(updatedStudent);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// 4. API Xóa sinh viên (DELETE - Câu 62)
+app.delete('/api/students/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedStudent = await Student.findByIdAndDelete(id);
+
+    if (!deletedStudent) {
+      return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
+    }
+
+    res.json({ message: 'Xóa sinh viên thành công' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
