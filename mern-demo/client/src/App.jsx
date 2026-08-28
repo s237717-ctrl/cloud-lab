@@ -7,7 +7,7 @@ function App() {
   const [email, setEmail] = useState('');
   const [editingId, setEditingId] = useState(null); // Lưu ID sinh viên đang chọn để sửa
 
-  const API_URL = '/api/students';
+ const API_URL = 'http://localhost:5000/api/students';
 
   // Lấy danh sách sinh viên
   const fetchStudents = async () => {

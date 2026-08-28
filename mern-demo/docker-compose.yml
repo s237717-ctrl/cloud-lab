@@ -1,0 +1,14 @@
+services:
+  backend:
+    build:
+      context: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: mongodb+srv://dbuser:12345678Aa@cluster0.gsryspa.mongodb.net/mern-db?retryWrites=true&w=majority
+
+  frontend:
+    build:
+      context: ./client
+    ports:
+      - "3000:3000"

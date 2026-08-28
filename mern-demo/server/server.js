@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // Chuỗi kết nối MongoDB Atlas
-const mongoURI = "mongodb+srv://admin:KimCuong2026Db@cluster0.gsryspa.mongodb.net/mern-demo?retryWrites=true&w=majority";
+const mongoURI = "mongodb+srv://dbuser:12345678Aa@cluster0.gsryspa.mongodb.net/mern-demo?retryWrites=true&w=majority";
 
 mongoose.connect(mongoURI)
   .then(() => console.log('Ket noi MongoDB Atlas thanh cong!'))
