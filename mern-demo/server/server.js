@@ -4,22 +4,18 @@ const cors = require('cors');
 
 const app = express();
 
-// 1. Cấu hình CORS mở rộng cho phép kết nối trực tiếp từ Frontend Render
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// 2. Middleware đọc dữ liệu JSON
 app.use(express.json());
 
-// Kiểm tra server hoạt động
 app.get('/', (req, res) => {
   res.send('Backend Quản Lý Sinh Viên đang hoạt động!');
 });
 
-// Kết nối MongoDB Atlas
 const mongoURI = process.env.MONGODB_URI;
 
 if (!mongoURI) {
@@ -35,17 +31,16 @@ if (!mongoURI) {
     });
 }
 
-// Model sinh viên
 const Student = require('./models/Student');
 
-// GET: Lấy danh sách sinh viên
+// GET: Lấy danh sách
 app.get('/api/students', async (req, res) => {
   try {
     const students = await Student.find();
     res.status(200).json(students);
   } catch (err) {
-    console.error('Lỗi lấy danh sách sinh viên:', err.message);
-    res.status(500).json({ message: 'Không thể lấy danh sách sinh viên' });
+    console.error('Lỗi lấy danh sách:', err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -60,11 +55,11 @@ app.post('/api/students', async (req, res) => {
       });
     }
 
-    const finalEmail = email || `${studentId}@student.edu.vn`;
+    const finalEmail = (email && email.trim() !== '') ? email.trim() : `${studentId.trim()}@student.edu.vn`;
 
     const newStudent = new Student({ 
-      studentId, 
-      name, 
+      studentId: studentId.trim(), 
+      name: name.trim(), 
       email: finalEmail 
     });
 
@@ -76,7 +71,7 @@ app.post('/api/students', async (req, res) => {
   }
 });
 
-// PUT: Cập nhật sinh viên
+// PUT: Cập nhật
 app.put('/api/students/:id', async (req, res) => {
   try {
     const { studentId, name, email } = req.body;
@@ -88,41 +83,31 @@ app.put('/api/students/:id', async (req, res) => {
     );
 
     if (!updatedStudent) {
-      return res.status(404).json({
-        message: 'Không tìm thấy sinh viên'
-      });
+      return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
     }
 
     res.status(200).json(updatedStudent);
   } catch (err) {
-    console.error('Lỗi cập nhật sinh viên:', err.message);
+    console.error('Lỗi cập nhật:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE: Xóa sinh viên
+// DELETE: Xóa
 app.delete('/api/students/:id', async (req, res) => {
   try {
     const deletedStudent = await Student.findByIdAndDelete(req.params.id);
-
     if (!deletedStudent) {
-      return res.status(404).json({
-        message: 'Không tìm thấy sinh viên'
-      });
+      return res.status(404).json({ message: 'Không tìm thấy sinh viên' });
     }
-
-    res.status(200).json({
-      message: 'Xóa sinh viên thành công'
-    });
+    res.status(200).json({ message: 'Xóa sinh viên thành công' });
   } catch (err) {
-    console.error('Lỗi xóa sinh viên:', err.message);
+    console.error('Lỗi xóa:', err.message);
     res.status(400).json({ message: err.message });
   }
 });
 
-// Khởi động server
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
