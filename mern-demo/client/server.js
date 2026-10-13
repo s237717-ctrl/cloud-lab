@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 10000;
 
 // Proxy request bắt đầu bằng /api sang Backend Render
 app.use('/api', createProxyMiddleware({
-  target: 'https://mern-backend-kimcuong29.onrender.com',
+  target: 'https://mern-backend-s237717dd.onrender.com',
   changeOrigin: true,
 }));
 
