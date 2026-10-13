@@ -5,14 +5,14 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Proxy request bắt đầu bằng /api sang Backend Render
+// Chuyển tiếp các request bắt đầu bằng /api sang Backend Render
 app.use('/api', createProxyMiddleware({
   target: 'https://mern-backend-s237717dd.onrender.com',
-  changeOrigin: true,
+  changeOrigin: true
 }));
 
-// Serve tĩnh build React
-app.use(express.static(path.join(__dirname, 'dist'))); // hoặc 'build' tùy theo thư mục xuất ra của Vite/CRA
+// Serve build static từ React Vite
+app.use(express.static(path.join(__dirname, 'dist')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
