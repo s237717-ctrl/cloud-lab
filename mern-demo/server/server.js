@@ -4,11 +4,17 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// 1. Cấu hình CORS mở rộng cho phép kết nối trực tiếp từ Frontend Render
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// 2. Middleware đọc dữ liệu JSON
 app.use(express.json());
 
-// Kiểm tra server
+// Kiểm tra server hoạt động
 app.get('/', (req, res) => {
   res.send('Backend Quản Lý Sinh Viên đang hoạt động!');
 });
@@ -48,15 +54,21 @@ app.post('/api/students', async (req, res) => {
   try {
     const { studentId, name, email } = req.body;
 
-    if (!studentId || !name || !email) {
+    if (!studentId || !name) {
       return res.status(400).json({
-        message: 'Vui lòng nhập đầy đủ MSSV, họ tên và email'
+        message: 'Vui lòng nhập đầy đủ MSSV và Họ tên'
       });
     }
 
-    const newStudent = new Student({ studentId, name, email });
-    const savedStudent = await newStudent.save();
+    const finalEmail = email || `${studentId}@student.edu.vn`;
 
+    const newStudent = new Student({ 
+      studentId, 
+      name, 
+      email: finalEmail 
+    });
+
+    const savedStudent = await newStudent.save();
     res.status(201).json(savedStudent);
   } catch (err) {
     console.error('Lỗi thêm sinh viên:', err.message);
