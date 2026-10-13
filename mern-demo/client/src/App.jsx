@@ -7,13 +7,13 @@ function App() {
   const [email, setEmail] = useState('');
   const [editingId, setEditingId] = useState(null);
 
-  // Gọi trực tiếp URL Backend tuyệt đối trên Render
-  const API_URL = 'https://mern-backend-s237717dd.onrender.com/api/students';
+  // Khai báo chính xác domain Backend
+  const BACKEND_URL = 'https://mern-backend-s237717dd.onrender.com';
 
   // Lấy danh sách sinh viên
   const fetchStudents = async () => {
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(`${BACKEND_URL}/api/students`);
       if (!res.ok) throw new Error(`Mã lỗi HTTP: ${res.status}`);
       const data = await res.json();
       setStudents(Array.isArray(data) ? data : []);
@@ -26,7 +26,7 @@ function App() {
     fetchStudents();
   }, []);
 
-  // Đổ dữ liệu vào Form khi nhấn nút "Sửa"
+  // Đổ dữ liệu vào Form khi nhấn "Sửa"
   const handleEdit = (student) => {
     setEditingId(student._id);
     setStudentId(student.studentId || '');
@@ -34,7 +34,7 @@ function App() {
     setEmail(student.email || '');
   };
 
-  // Hủy trạng thái sửa
+  // Hủy sửa
   const handleCancel = () => {
     setEditingId(null);
     setStudentId('');
@@ -56,15 +56,15 @@ function App() {
       };
 
       if (editingId) {
-        // Request PUT
-        res = await fetch(`${API_URL}/${editingId}`, {
+        // Request PUT: https://mern-backend-s237717dd.onrender.com/api/students/:id
+        res = await fetch(`${BACKEND_URL}/api/students/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       } else {
-        // Request POST
-        res = await fetch(API_URL, {
+        // Request POST: https://mern-backend-s237717dd.onrender.com/api/students
+        res = await fetch(`${BACKEND_URL}/api/students`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -80,11 +80,7 @@ function App() {
       }
 
       // Reset form sau khi gửi thành công
-      setEditingId(null);
-      setStudentId('');
-      setName('');
-      setEmail('');
-      
+      handleCancel();
       fetchStudents(); 
     } catch (err) {
       console.error("Lỗi gửi dữ liệu:", err);
@@ -96,7 +92,7 @@ function App() {
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa sinh viên này?')) return;
     try {
-      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${BACKEND_URL}/api/students/${id}`, { method: 'DELETE' });
       if (res.ok) fetchStudents();
     } catch (err) {
       console.error("Lỗi xóa sinh viên:", err);
