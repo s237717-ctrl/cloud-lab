@@ -7,7 +7,8 @@ function App() {
   const [email, setEmail] = useState('');
   const [editingId, setEditingId] = useState(null);
 
-  const API_URL = '/api/students';
+  // Gọi trực tiếp URL Backend tuyệt đối trên Render
+  const API_URL = 'https://mern-backend-s237717dd.onrender.com/api/students';
 
   // Lấy danh sách sinh viên
   const fetchStudents = async () => {
@@ -48,13 +49,10 @@ function App() {
 
     try {
       let res;
-      // Dữ liệu payload đáp ứng đầy đủ tất cả các trường Mongoose Schema có thể yêu cầu
       const payload = { 
         studentId: studentId.trim(), 
         name: name.trim(), 
-        email: email.trim() || `${studentId}@student.edu.vn`, 
-        major: 'CNTT',
-        class: 'K46'
+        email: email.trim() || `${studentId}@student.edu.vn`
       };
 
       if (editingId) {
