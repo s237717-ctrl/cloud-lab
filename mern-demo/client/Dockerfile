@@ -1,23 +1,18 @@
-# Câu 51: 
-FROM node:20-alpine
-
-# Câu 52: 
+# Step 1: Build React/Vite App
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Câu 53: 
 COPY package*.json ./
-
-# Câu 54:
 RUN npm install
-
-# Câu 55: 
 COPY . .
-
-# Câu 56: 
 RUN npm run build
 
-# Cài đặt serve để host các file tĩnh sau khi build
-RUN npm install -g serve
+# Step 2: Chạy Express Reverse Proxy Server
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --only=production
+COPY --from=builder /app/dist ./dist
+COPY server.js .
 
-# Lệnh khởi chạy server phục vụ thư mục dist ở port 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+EXPOSE 3000
+CMD ["node", "server.js"]

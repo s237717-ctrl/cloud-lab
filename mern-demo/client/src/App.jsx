@@ -5,17 +5,17 @@ function App() {
   const [studentId, setStudentId] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [editingId, setEditingId] = useState(null); // Lưu ID sinh viên đang chọn để sửa
+  const [editingId, setEditingId] = useState(null);
 
- const API_URL = 'http://localhost:5000/api/students';
+  const API_URL = '/api/students';
 
   // Lấy danh sách sinh viên
   const fetchStudents = async () => {
     try {
       const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Không thể tải danh sách');
+      if (!res.ok) throw new Error(`Mã lỗi HTTP: ${res.status}`);
       const data = await res.json();
-      setStudents(data);
+      setStudents(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Lỗi khi tải danh sách:", err);
     }
@@ -25,15 +25,15 @@ function App() {
     fetchStudents();
   }, []);
 
-  // Hàm đổ dữ liệu sinh viên vào Form khi nhấn nút "Sửa"
+  // Đổ dữ liệu vào Form khi nhấn nút "Sửa"
   const handleEdit = (student) => {
     setEditingId(student._id);
-    setStudentId(student.studentId);
-    setName(student.name);
-    setEmail(student.email);
+    setStudentId(student.studentId || '');
+    setName(student.name || '');
+    setEmail(student.email || '');
   };
 
-  // Hàm Hủy trạng thái sửa
+  // Hủy trạng thái sửa
   const handleCancel = () => {
     setEditingId(null);
     setStudentId('');
@@ -41,33 +41,43 @@ function App() {
     setEmail('');
   };
 
-  // Xử lý Thêm mới (POST) hoặc Cập nhật (PUT - Câu 61)
+  // Thêm mới (POST) hoặc Cập nhật (PUT)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!studentId || !name || !email) return alert('Vui lòng điền đủ thông tin');
+    if (!studentId || !name) return alert('Vui lòng điền đủ MSSV và Họ tên');
 
     try {
       let res;
-      
+      // Dữ liệu payload đáp ứng đầy đủ tất cả các trường Mongoose Schema có thể yêu cầu
+      const payload = { 
+        studentId: studentId.trim(), 
+        name: name.trim(), 
+        email: email.trim() || `${studentId}@student.edu.vn`, 
+        major: 'CNTT',
+        class: 'K46'
+      };
+
       if (editingId) {
-        // === CÂU 61: GỬI REQUEST PUT ĐỂ CẬP NHẬT SINH VIÊN ===
+        // Request PUT
         res = await fetch(`${API_URL}/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId, name, email }),
+          body: JSON.stringify(payload),
         });
       } else {
-        // Thêm sinh viên mới (POST)
+        // Request POST
         res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId, name, email }),
+          body: JSON.stringify(payload),
         });
       }
 
+      const responseData = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const errorData = await res.json();
-        alert(`Thao tác thất bại: ${errorData.message || 'Lỗi dữ liệu'}`);
+        console.error("Chi tiết lỗi từ Backend:", responseData);
+        alert(`Thao tác thất bại: ${responseData.message || responseData.error || 'Lỗi dữ liệu từ Backend'}`);
         return;
       }
 
@@ -77,7 +87,6 @@ function App() {
       setName('');
       setEmail('');
       
-      // Tải lại bảng để hiển thị thông tin mới cập nhật
       fetchStudents(); 
     } catch (err) {
       console.error("Lỗi gửi dữ liệu:", err);
@@ -100,7 +109,7 @@ function App() {
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <h2>Quản Lý Sinh Viên</h2>
 
-      {/* Form nhập thông tin sinh viên */}
+      {/* Form nhập thông tin */}
       <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
         <input
           type="text"
@@ -142,7 +151,7 @@ function App() {
         )}
       </form>
 
-      {/* Bảng danh sách sinh viên */}
+      {/* Bảng danh sách */}
       <table border="1" cellPadding="10" cellSpacing="0">
         <thead>
           <tr>
@@ -157,7 +166,7 @@ function App() {
             <tr key={sv._id}>
               <td>{sv.studentId}</td>
               <td>{sv.name}</td>
-              <td>{sv.email}</td>
+              <td>{sv.email || 'Chưa cập nhật'}</td>
               <td>
                 <button 
                   onClick={() => handleEdit(sv)} 
